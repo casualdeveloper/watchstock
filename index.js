@@ -1,7 +1,8 @@
 const express = require("express");
 const app = express();
 const path = require("path");
-
+const fetch = require("node-fetch");
+const config = require("./config.json");
 
 
 
@@ -23,9 +24,20 @@ const server = app.listen(port,(err)=>{
 const io = require("socket.io")(server);
 
 io.on("connection", (socket) => {  
-  console.log("a user connected");
+  socket.on("request.data", (data) => {
+    let json;
+    fetch(`http://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${data}&interval=1min&apikey=${config.API_KEY}`)
+      .then(res => res.json())
+        .then((json)=>{
 
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
+          json = json;
+          sendNewDataToEveryone(json);
+
+      });
+
   });
 });
+
+function sendNewDataToEveryone(data){
+  io.sockets.emit("new.data",data);
+}
