@@ -3,7 +3,9 @@ const app = express();
 const path = require("path");
 const fetch = require("node-fetch");
 const config = require("./config.json");
+const compression = require("compression");
 
+app.use(compression());
 
 app.use(express.static(path.resolve(__dirname, "client", "build")));
 

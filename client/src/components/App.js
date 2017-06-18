@@ -22,7 +22,9 @@ export default class App extends React.Component{
     }
 
     clickHandler(e) {
-        e.preventDefault();
+        if(e.type === "keydown" && e.keyCode !== 13)
+            return;
+        this.setState({error: null});
         let stockCode = this.stockInput.value;
         this.socket.emit("request.data", stockCode);
     }
@@ -40,7 +42,7 @@ export default class App extends React.Component{
 
 
         this.socket.on("new.data", (data) => {
-            console.log(data);
+            //console.log(data);
             let processedData = this.processResponseJSON(data);
             if(processedData)
                 this.addData(this.processResponseJSON(data));
@@ -57,7 +59,6 @@ export default class App extends React.Component{
             this.setState({error: "Invalid stock code"});
             return null;
         }
-        this.setState({error: null});
 
 
         let numbers = json["Time Series (Daily)"];
@@ -199,7 +200,7 @@ export default class App extends React.Component{
             <div>
                 <Paper className="main-paper" zDepth={1} rounded={false} >
                     <canvas id="myChart" width="800" height="400"></canvas>
-                    <TextField errorText={this.state.error} id="stockInput" hintText="Stock code" /><br />
+                    <TextField onKeyDown={this.clickHandler}  errorText={this.state.error} id="stockInput" hintText="Stock code" /><br />
                     <RaisedButton onTouchTap={this.clickHandler}>Add</RaisedButton>
                     <Chips data={this.state.labelData} deleteHandler={this.deleteHandler}/>
                 </Paper>
@@ -211,13 +212,13 @@ export default class App extends React.Component{
 const Chips = (props) => {
     if(!props.data || props.data.length === 0)
         return null;
-    console.log(props.data);
+    //console.log(props.data);
     return (
         <div className="chips">
             {props.data.map(obj=>
-                <Chip key={obj.index}
+                <Chip key={obj.index} 
                     onRequestDelete={()=>{props.deleteHandler(obj.index)}}
-                    className="chip" >{obj.label}
+                    className="chip" ><span style={{borderBottom: "2px solid "+obj.color}}>{obj.label}</span>
                 </Chip>
             )}
         </div>
