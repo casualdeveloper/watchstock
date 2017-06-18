@@ -11,3 +11,10 @@ body{
     text-align: center;
     padding:20px;
 }
+.chip{
+    margin: 4px !important;
+}
+.chips{
+    display: flex;
+    flex-wrap: wrap;
+}

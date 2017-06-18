@@ -41,6 +41,12 @@ io.on("connection", (socket) => {
       });
 
   });
+
+  socket.on("delete.data.server", index => {
+    stocks.splice(index,1);
+    io.sockets.emit("delete.data.client", index);
+  });
+
 });
 
 function sendNewDataToEveryone(data){

@@ -5,16 +5,19 @@ import Chart from "chart.js";
 import RaisedButton from "material-ui/RaisedButton";
 import Paper from "material-ui/Paper";
 import TextField from "material-ui/TextField";
+import Chip from "material-ui/Chip";
 
 export default class App extends React.Component{
     constructor(props) {
         super(props);
         this.clickHandler = this.clickHandler.bind(this);
+        this.deleteHandler = this.deleteHandler.bind(this);
         this.socket = io();
         this.socketLinstener();
         this.chart = {};
         this.state = {
-            error: null
+            error: null,
+            labelData: []
         }
     }
 
@@ -24,8 +27,12 @@ export default class App extends React.Component{
         this.socket.emit("request.data", stockCode);
     }
 
+    deleteHandler(e, index){
+        this.socket.emit("delete.data.server", index);
+    }
+
     socketLinstener(){
-        this.socket.on("current.data", data => {
+        this.socket.on("current.data", (data) => {
             for(let i = 0 ; i < data.length; i++){
                 this.addData(this.processResponseJSON(data[i]));
             }
@@ -37,6 +44,11 @@ export default class App extends React.Component{
             let processedData = this.processResponseJSON(data);
             if(processedData)
                 this.addData(this.processResponseJSON(data));
+        });
+
+
+        this.socket.on("delete.data.client", (index) => {
+            this.deleteData(index);
         });
     }
 
@@ -59,8 +71,8 @@ export default class App extends React.Component{
             }
         }
         return {
-            data:data,
-            label:label,
+            data: data,
+            label: label,
             labels: labels
         }
     }
@@ -81,7 +93,7 @@ export default class App extends React.Component{
         }
 
         let newDataSet = {
-            label: data.label,
+            label: data.label.toUpperCase(),
             data: data.data,
             borderColor: newColor(),
             pointRadius:0,
@@ -95,6 +107,13 @@ export default class App extends React.Component{
         this.chart.options.scales.xAxes[0].time.min = data.labels[data.labels.length - 1];
 
         this.chart.update();
+        this.setState({labelData: this.chart.generateLegend()});
+    }
+
+    deleteData(index){
+        this.chart.data.datasets.splice(index,1);
+        this.chart.update();
+        this.setState({labelData: this.chart.generateLegend()});
     }
 
     chartInit(json){
@@ -107,6 +126,24 @@ export default class App extends React.Component{
         }
 
         let options = {
+            title: {
+                display: true,
+                fontSize: 30,
+                fontFamily: "Roboto",
+                fontStyle: "normal",
+                text: "Stocks"
+            },
+            legend: false,
+            legendCallback: function(chart) {
+                let arrayOfLegends = chart.data.datasets.map((obj,index)=>{
+                    return {
+                        label: obj.label,
+                        index: index,
+                        color: obj.borderColor
+                    }
+                });
+                return arrayOfLegends;
+            },
             tooltips:{
                 mode: "index",
                 intersect: false
@@ -164,10 +201,27 @@ export default class App extends React.Component{
                     <canvas id="myChart" width="800" height="400"></canvas>
                     <TextField errorText={this.state.error} id="stockInput" hintText="Stock code" /><br />
                     <RaisedButton onTouchTap={this.clickHandler}>Add</RaisedButton>
+                    <Chips data={this.state.labelData} deleteHandler={this.deleteHandler}/>
                 </Paper>
             </div>
         );
     }
+}
+
+const Chips = (props) => {
+    if(!props.data || props.data.length === 0)
+        return null;
+    console.log(props.data);
+    return (
+        <div className="chips">
+            {props.data.map(obj=>
+                <Chip key={obj.index}
+                    onRequestDelete={()=>{props.deleteHandler(obj.index)}}
+                    className="chip" >{obj.label}
+                </Chip>
+            )}
+        </div>
+    );
 }
 
 
