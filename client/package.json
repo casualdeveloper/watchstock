@@ -5,10 +5,12 @@
   "dependencies": {
     "chart.js": "^2.6.0",
     "chartist": "^0.11.0",
+    "material-ui": "^0.18.3",
     "moment": "^2.18.1",
     "react": "^15.6.0",
     "react-dom": "^15.6.0",
     "react-redux": "^5.0.5",
+    "react-tap-event-plugin": "^2.0.1",
     "redux": "^3.6.0"
   },
   "devDependencies": {

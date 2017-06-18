@@ -1,4 +1,13 @@
+body{
+    margin:0px;
+}
 #myChart{
     max-width:800px;
-    max-height:500px;
+    max-height:400px;
+    padding:10px;
+    margin:auto;
+}
+.main-paper{
+    text-align: center;
+    padding:20px;
 }

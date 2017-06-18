@@ -2,6 +2,9 @@ import React from "react";
 import io from "socket.io-client";
 import moment from "moment";
 import Chart from "chart.js";
+import RaisedButton from "material-ui/RaisedButton";
+import Paper from "material-ui/Paper";
+import TextField from "material-ui/TextField";
 
 export default class App extends React.Component{
     constructor(props) {
@@ -10,21 +13,33 @@ export default class App extends React.Component{
         this.socket = io();
         this.socketLinstener();
         this.chart = {};
+        this.state = {
+            error: null
+        }
     }
 
     clickHandler(e) {
         e.preventDefault();
-        this.socket.emit("request.data", "GOOGL");
+        let stockCode = this.stockInput.value;
+        this.socket.emit("request.data", stockCode);
     }
 
     socketLinstener(){
         this.socket.on("new.data", (data) => {
             console.log(data);
-            this.addData(this.processResponseJSON(data));
+            let processedData = this.processResponseJSON(data);
+            if(processedData)
+                this.addData(this.processResponseJSON(data));
         });
     }
 
     processResponseJSON(json){
+        if(json["Error Message"]){
+            this.setState({error: "Invalid stock code"});
+            return null;
+        }
+
+
         let numbers = json["Time Series (Daily)"];
         let label = json["Meta Data"]["2. Symbol"];
         let data = [];
@@ -100,8 +115,8 @@ export default class App extends React.Component{
                     },
                     type: "time",
                     time: {
-                        //max: labels[0],
-                        //min: labels[labels.length - 1],
+                        max: data.labels[0],
+                        min: data.labels[data.labels.length - 1],
                     },
                     ticks: {
                         maxRotation: 0,
@@ -127,14 +142,18 @@ export default class App extends React.Component{
 
     componentDidMount(){
         this.chart = this.chartInit();
+        this.stockInput = document.getElementById("stockInput");
+        console.log(this.stockInput);
     }
     
     render() {
         return(
             <div>
-                <button onClick={this.clickHandler}>CLICK</button>
-                <canvas id="myChart" width="800" height="500"></canvas>
-                
+                <Paper className="main-paper" zDepth={1} rounded={false} >
+                    <canvas id="myChart" width="800" height="400"></canvas>
+                    <TextField errorText={this.state.error} id="stockInput" hintText="Stock code" /><br />
+                    <RaisedButton onTouchTap={this.clickHandler}>Add</RaisedButton>
+                </Paper>
             </div>
         );
     }
