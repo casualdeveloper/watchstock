@@ -26,7 +26,7 @@ const io = require("socket.io")(server);
 io.on("connection", (socket) => {  
   socket.on("request.data", (data) => {
     let json;
-    fetch(`http://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${data}&interval=1min&apikey=${config.API_KEY}`)
+    fetch(`http://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${data}&apikey=${config.API_KEY}`)
       .then(res => res.json())
         .then((json)=>{
 
