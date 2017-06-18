@@ -38,6 +38,7 @@ export default class App extends React.Component{
             this.setState({error: "Invalid stock code"});
             return null;
         }
+        this.setState({error: null});
 
 
         let numbers = json["Time Series (Daily)"];
@@ -82,6 +83,10 @@ export default class App extends React.Component{
 
 
         this.chart.data.datasets.push(newDataSet);
+        
+        this.chart.options.scales.xAxes[0].time.max = data.labels[0];
+        this.chart.options.scales.xAxes[0].time.min = data.labels[data.labels.length - 1];
+
         this.chart.update();
     }
 
@@ -115,8 +120,8 @@ export default class App extends React.Component{
                     },
                     type: "time",
                     time: {
-                        max: data.labels[0],
-                        min: data.labels[data.labels.length - 1],
+                        //max: data.labels[0],
+                        //min: data.labels[data.labels.length - 1],
                     },
                     ticks: {
                         maxRotation: 0,
@@ -143,7 +148,6 @@ export default class App extends React.Component{
     componentDidMount(){
         this.chart = this.chartInit();
         this.stockInput = document.getElementById("stockInput");
-        console.log(this.stockInput);
     }
     
     render() {
