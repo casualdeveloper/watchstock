@@ -5,8 +5,6 @@ const fetch = require("node-fetch");
 const config = require("./config.json");
 
 
-
-
 app.use(express.static(path.resolve(__dirname, "client", "build")));
 
 app.get("*", (req, res) => {
@@ -23,7 +21,12 @@ const server = app.listen(port,(err)=>{
 
 const io = require("socket.io")(server);
 
+const stocks=[];
+
 io.on("connection", (socket) => {  
+
+  socket.emit("current.data",stocks);
+
   socket.on("request.data", (data) => {
     let json;
     fetch(`http://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${data}&apikey=${config.API_KEY}`)
@@ -31,6 +34,8 @@ io.on("connection", (socket) => {
         .then((json)=>{
 
           json = json;
+          if(!json["Error Message"])
+            stocks.push(json);
           sendNewDataToEveryone(json);
 
       });

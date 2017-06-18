@@ -25,6 +25,13 @@ export default class App extends React.Component{
     }
 
     socketLinstener(){
+        this.socket.on("current.data", data => {
+            for(let i = 0 ; i < data.length; i++){
+                this.addData(this.processResponseJSON(data[i]));
+            }
+        });
+
+
         this.socket.on("new.data", (data) => {
             console.log(data);
             let processedData = this.processResponseJSON(data);
