@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const fetch = require("node-fetch");
-const config = require("./config.json");
+//const config = require("./config.json");
 const compression = require("compression");
 
 app.use(compression());
@@ -25,13 +25,16 @@ const io = require("socket.io")(server);
 
 const stocks=[];
 
+const API_KEY = process.env.API_KEY;
+
 io.on("connection", (socket) => {  
 
   socket.emit("current.data",stocks);
 
   socket.on("request.data", (data) => {
     let json;
-    fetch(`http://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${data}&apikey=${config.API_KEY}`)
+
+    fetch(`http://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${data}&apikey=${API_KEY}`)
       .then(res => res.json())
         .then((json)=>{
 
